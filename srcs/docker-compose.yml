@@ -1,0 +1,116 @@
+services:
+  mariadb:
+    build:
+      context: ${DB_DIRECTORY}
+    container_name: ${MARIADB_CONTAINER_NAME}
+    image: ${MARIADB_IMAGE_NAME}
+    secrets:
+      - credentials
+      - db_password
+      - db_root_password
+    networks:
+      - inception
+    volumes:
+      - mariadb_data:/var/lib/mysql:rw
+    env_file:
+      - ./.env
+    restart: always
+
+  nginx:
+    build:
+      context: ${NGINX_DIRECTORY}
+    container_name: ${NGINX_CONTAINER_NAME}
+    image: ${NGINX_IMAGE_NAME}
+    extra_hosts:
+      - "${DOMAIN_NAME}:127.0.0.1"
+    ports:
+      - "443:443"
+    depends_on:
+      - mariadb
+      - wordpress
+    networks:
+      - inception
+    volumes:
+      - wordpress_data:/var/www/html:rw
+    env_file:
+      - ./.env
+    restart: always
+
+  wordpress:
+    build: ./requirements/wordpress
+    container_name: ${WORDPRESS_CONTAINER_NAME}
+    image: ${WORDPRESS_IMAGE_NAME}
+    secrets:
+      - credentials
+      - db_password
+      - db_root_password
+      - wp_admin
+      - wp_admin_pass
+      - wp_admin_email
+      - wp_user
+      - wp_user_pass
+      - wp_user_email
+    depends_on:
+      - mariadb
+    networks:
+      - inception
+    volumes:
+      - wordpress_data:/var/www/html:rw
+    expose:
+      - "9000"
+    env_file:
+      - .env
+    restart: always
+
+secrets:
+  credentials:
+    file: ${DB_CREDENTIALS_FILE}
+  db_password:
+    file: ${DB_PASSWORD_FILE}
+  db_root_password:
+    file: ${DB_ROOT_PASSWORD_FILE}
+  wp_admin:
+    file: ${WP_ADMIN_FILE}
+  wp_admin_pass:
+    file: ${WP_ADMIN_PASS_FILE}
+  wp_admin_email:
+    file: ${WP_ADMIN_EMAIL_FILE}
+  wp_user:
+    file: ${WP_USER_FILE}
+  wp_user_pass:
+    file: ${WP_USER_PASS_FILE}
+  wp_user_email:
+    file: ${WP_USER_EMAIL_FILE}
+
+networks:
+  inception:
+    name: inception
+    external: false
+
+volumes:
+  mariadb_data:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${SAVE_LOCALLY}/mariadb
+  wordpress_data:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${SAVE_LOCALLY}/wordpress
+      
+      
+# This is a Docker Compose file used to define and run multi-container Docker applications.
+# It specifies the services, networks, and volumes required for the application.
+
+# version: Specifies the version of the Docker Compose file format being used.
+# services: Defines the individual services (containers) that make up the application.
+# Each service can have its own configuration, such as the image to use, ports to expose, environment variables, etc.
+
+# networks: Defines custom networks for communication between services.
+# By default, Docker Compose creates a network for the application, but custom networks can be specified if needed.
+
+# volumes: Defines shared storage that can be used by services to persist data.
+# Volumes allow data to be retained even if the container is stopped or removed.
