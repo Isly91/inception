@@ -18,7 +18,7 @@ All containers must be built using **Dockerfiles only**, with no use of pre-buil
 ---
 
 ## 📦 Stack & Services
-|------------------------------------------------|
+
 | Service   | Description                        |
 |-----------|------------------------------------|
 | Nginx     | Reverse proxy with SSL (TLSv1.2+)  |
@@ -27,7 +27,7 @@ All containers must be built using **Dockerfiles only**, with no use of pre-buil
 | Redis     | Caching layer for WordPress        |
 | Adminer   | Lightweight DB management tool     |
 | Static    | PHP classic webpage (Blog)         |
-|------------------------------------------------|
+
 ---
 
 ## 🔐 Security Highlights
